@@ -6,7 +6,11 @@ WRITE YOUR CODE IN THE RESPECTIVE QUESTION FUNCTION BLOCK
 
 */
 
+using System.Buffers.Text;
+using System.Collections.Generic;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
+using System.Xml.Linq;
 
 namespace ISM6225_Fall_2023_Assignment_2
 {
@@ -85,7 +89,8 @@ namespace ISM6225_Fall_2023_Assignment_2
         /*
         
         Question 1:
-        You are given an inclusive range [lower, upper] and a sorted unique integer array nums, where all elements are within the inclusive range. A number x is considered missing if x is in the range [lower, upper] and x is not in nums. Return the shortest sorted list of ranges that exactly covers all the missing numbers. That is, no element of nums is included in any of the ranges, and each missing number is covered by one of the ranges.
+        You are given an inclusive range [lower, upper] and a sorted unique integer array nums, where all elements are within the 
+        inclusive range. A number x is considered missing if x is in the range [lower, upper] and x is not in nums. Return the shortest sorted list of ranges that exactly covers all the missing numbers. That is, no element of nums is included in any of the ranges, and each missing number is covered by one of the ranges.
         Example 1:
         Input: nums = [0,1,3,50,75], lower = 0, upper = 99
         Output: [[2,2],[4,49],[51,74],[76,99]]  
@@ -112,8 +117,33 @@ namespace ISM6225_Fall_2023_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return new List<IList<int>>();
+                // Initialize result list
+                List<IList<int>> missingRanges = new List<IList<int>>();
+
+                // Initialize prev to be 1 lower than lower bound 
+                int prev = lower - 1;
+
+                // Loop through nums array
+                for (int i = 0; i <= nums.Length; i++)
+                {
+
+                    // Get current number, use upper + 1 if at end
+                    int curr = (i < nums.Length) ? nums[i] : upper + 1;
+
+                    // Check if difference between curr and prev is 2 or more
+                    if (curr - prev >= 2)
+                    {
+
+                        // Add missing range to result
+                        missingRanges.Add(new List<int> { prev + 1, curr - 1 });
+                    }
+
+                    // Update prev to current
+                    prev = curr;
+                }
+
+                // Return result list
+                return missingRanges;
             }
             catch (Exception)
             {
@@ -121,6 +151,16 @@ namespace ISM6225_Fall_2023_Assignment_2
             }
 
         }
+
+        /* *******************************************************************************************
+                Self-reflection:
+
+                    This question tested the ability to find missing ranges in a sorted array. 
+                    The key learning was using a prev pointer to track the previous number, 
+                    and comparing it with the current number to check for gaps of size >= 2.
+
+
+       **************************************************************************************************** */
 
         /*
          
@@ -156,14 +196,43 @@ namespace ISM6225_Fall_2023_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return s.Length == 0;
+                // Iterate through each character in the input string
+                for (int i = 0; i < s.Length; i++)
+                {
+                    // iterates through the input string
+
+                    if (s[i] == '(' || s[i] == '{' || s[i] == '[')
+                    {
+                        // If an opening bracket is found, search for its corresponding closing bracket
+                       
+
+                        for (int j = i + 1; j < s.Length; j++)
+                        {
+                            // Iterate through the characters after the opening bracket
+
+                            if (s[j] == ')' || s[j] == '}' || s[j] == ']')
+                            {
+                                // If a closing bracket is found, break the inner loop
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // If the function completes without finding any mismatched brackets, return true
+                return true;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        /* ********************************************************************************
+            Self-reflection
+
+             Can use data structure like stack to achieve a better time complexity of O(n)
+           ******************************************************************************************* */
 
         /*
 
@@ -183,7 +252,6 @@ namespace ISM6225_Fall_2023_Assignment_2
         Constraints:
         1 <= prices.length <= 105
         0 <= prices[i] <= 104
-
         Time complexity: O(n), space complexity:O(1)
         */
 
@@ -191,14 +259,49 @@ namespace ISM6225_Fall_2023_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 1;
+                // Variables to track buying and selling indices and maximum profit
+                int left = 0; // Buy
+                int right = 1; // Sell
+                int maxProfit = 0;
+
+                // Loop until the selling index reaches the end of the prices array
+                while (right < prices.Length)
+                {
+                    // Calculate the current profit by subtracting buying price from selling price
+                    int currentProfit = prices[right] - prices[left];
+
+                    // If the buying price is less than the selling price, update the maximum profit
+                    if (prices[left] < prices[right])
+                    {
+                        maxProfit = Math.Max(currentProfit, maxProfit);
+                    }
+                    else
+                    {
+                        // If the buying price is greater than or equal to the selling price,
+                        // update the left index to the current right index (new buying position)
+                        left = right;
+                    }
+
+                    // Move the right index to the next element in the prices array
+                    right++;
+                }
+
+                // Return the maximum profit achieved
+                return maxProfit;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        /* *************************************************************************************************************
+            Self Reflection
+            Learned the sliding window approach to track min price for optimizing buy/sell
+            profit. Useful pattern for other optimization problems.
+
+
+         * ******************************************************************************************************** */
 
         /*
         
@@ -225,18 +328,43 @@ namespace ISM6225_Fall_2023_Assignment_2
         Time complexity:O(n), space complexity:O(1)
         */
 
-        public static bool IsStrobogrammatic(string s)
+        public static bool IsStrobogrammatic(string num)
         {
+
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return false;
+                // Hash table to map rotated numbers
+                Dictionary<char, char> map = new Dictionary<char, char>() { { '0', '0' }, { '1', '1' }, { '6', '9' }, { '8', '8' }, { '9', '6' } };
+
+                int left = 0;
+                int right = num.Length - 1;
+
+                while (left <= right)
+                {
+                    // Check if mapping exists
+                    if (!map.ContainsKey(num[left]) || map[num[left]] != num[right])
+                    {
+                        return false;
+                    }
+                    left++;
+                    right--;
+                }
+
+                return true;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        /* *************************************************************************************************************
+        Self Reflection  
+        
+        Learned an efficient approach to validate palindrome-like patterns using hash maps to store mappings. Can apply this for other palindrome problems.
+       
+         ************************************************************************************************************** */
+
 
         /*
 
@@ -269,16 +397,53 @@ namespace ISM6225_Fall_2023_Assignment_2
 
         public static int NumIdenticalPairs(int[] nums)
         {
+
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 0;
+                // Create a dictionary to store the count of each number encountered in the 'nums' array
+                Dictionary<int, int> count = new Dictionary<int, int>();
+
+                // Variable to store the final result, which represents the number of pairs with the same value
+                int result = 0;
+
+                // Iterate through each number in the 'nums' array
+                foreach (int num in nums)
+                {
+                    // Check if the number already exists in the 'count' dictionary
+                    if (count.ContainsKey(num))
+                    {
+                        // If the number exists, add the current count to the 'result'
+                        // This represents the number of pairs with the same value encountered so far
+                        result += count[num];
+
+                        // Increment the count for the current number in the 'count' dictionary
+                        count[num]++;
+                    }
+                    else
+                    {
+                        // If the number is encountered for the first time, initialize its count to 1 in the 'count' dictionary
+                        count[num] = 1;
+                    }
+                }
+
+                // Return the final result, which represents the total number of pairs with the same value in the 'nums' array
+                return result;
+
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        /* ******************************************************************************************************************
+            Self Reflection
+            This problem tested the ability to use hash tables to optimize counting pairs.
+
+            Learned that using hash tables is an efficient way to count pairs or 
+            combinations in arrays by leveraging the frequency counts.
+
+        ****************************************************************************************************************** */
 
         /*
         Question 6
@@ -319,10 +484,36 @@ namespace ISM6225_Fall_2023_Assignment_2
 
         public static int ThirdMax(int[] nums)
         {
+
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 0;
+
+                // Initialize a SortedSet to store unique values in ascending order
+                SortedSet<int> sortedSet = new SortedSet<int>();
+
+                // Add elements to the SortedSet
+                foreach (int num in nums)
+                {
+                    if (!sortedSet.Contains(num))
+                    {
+                        sortedSet.Add(num);
+                        // If the size of the SortedSet exceeds 3, remove the minimum element
+                        if (sortedSet.Count > 3)
+                        {
+                            sortedSet.Remove(sortedSet.First());
+                        }
+                    }
+                }
+
+                // If there are less than 3 distinct elements, return the maximum element
+                if (sortedSet.Count < 3)
+                {
+                    return sortedSet.Max();
+                }
+
+                // The third maximum element is at the first position in the SortedSet (zero-based index)
+                return sortedSet.First();
+    
             }
             catch (Exception)
             {
@@ -330,6 +521,13 @@ namespace ISM6225_Fall_2023_Assignment_2
             }
         }
 
+        /* ******************************************************************************************************************
+            Self Reflection
+            
+           My implementation (using SortedSet) has a higher time complexity (O(n log n)) due to the logarithmic time operations in the SortedSet, 
+            whereas if we use HashSet we will have a lower time complexity (O(n)) because it performs constant time operations.
+       
+        ********************************************************************************************************************** */
         /*
         
         Question 7:
@@ -352,10 +550,33 @@ namespace ISM6225_Fall_2023_Assignment_2
 
         public static IList<string> GeneratePossibleNextMoves(string currentState)
         {
+
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return new List<string>() { };
+                List<string> result = new List<string>();
+
+                // Use StringBuilder for efficient string manipulation
+                StringBuilder sb = new StringBuilder(currentState);
+
+                for (int i = 1; i < sb.Length; i++)
+                {
+                    // Check for valid flip
+                    if (sb[i] == '+' && sb[i - 1] == '+')
+                    {
+                        // Flip the characters in StringBuilder
+                        sb[i - 1] = '-';
+                        sb[i] = '-';
+
+                        // Add the modified StringBuilder to the result
+                        result.Add(sb.ToString());
+
+                        // Revert the characters back to the original state for further iterations
+                        sb[i - 1] = '+';
+                        sb[i] = '+';
+                    }
+                }
+
+                return result;
             }
             catch (Exception)
             {
@@ -363,6 +584,14 @@ namespace ISM6225_Fall_2023_Assignment_2
             }
         }
 
+        /* *********************************************************************************************************************
+         Self Reflection
+
+        Learned an efficient way to generate all combinations of a state by 
+        iterating through input and modifying locally. Useful for backtracking 
+        problems.
+
+        ********************************************************************************************************************** */
         /*
 
         Question 8:
@@ -383,9 +612,28 @@ namespace ISM6225_Fall_2023_Assignment_2
 
         public static string RemoveVowels(string s)
         {
-            // Write your code here and you can modify the return value according to the requirements
-            return "";
+
+            // HashSet to store vowels
+            HashSet<char> vowels = new HashSet<char> { 'a', 'e', 'i', 'o', 'u' };
+
+            StringBuilder result = new StringBuilder();
+
+            foreach (char c in s)
+            {
+                // Add character if not a vowel
+                if (!vowels.Contains(char.ToLower(c)))
+                {
+                    result.Append(c);
+                }
+            }
+
+            return result.ToString();
         }
+
+        /* ******************************************************************************************************************
+        Self Reflection
+        Learned that HashSets allow fast lookup and are useful for filtering strings or arrays based on membership.
+        ***************************************************************************************************************** */
 
         /* Inbuilt Functions - Don't Change the below functions */
         static string ConvertIListToNestedList(IList<IList<int>> input)
